@@ -21,4 +21,3 @@ ___
 | library                                | description             | license    | source                                              |
 |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
 | PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
-
