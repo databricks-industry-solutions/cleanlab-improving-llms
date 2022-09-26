@@ -1,8 +1,6 @@
 # Databricks notebook source
-# MAGIC %pip install cleanlab autogluon.tabular[lightgbm,xgboost]
-
-# COMMAND ----------
-
+# !pip install cleanlab
+# !pip install autogluon.tabular[lightgbm,xgboost]
 from autogluon.tabular import TabularPredictor
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import confusion_matrix
@@ -12,10 +10,8 @@ from cleanlab.filter import find_label_issues
 import cleanlab
 import numpy as np
 import pandas as pd
-import os
 pd.options.mode.chained_assignment = None
 pd.set_option("display.max_colwidth", None)
-os.chdir("/databricks/driver")
 
 # COMMAND ----------
 
@@ -79,13 +75,13 @@ os.chdir("/databricks/driver")
 # COMMAND ----------
 
 # These are the four emotions. 
-target_emotions = ['amusement', 'disapproval', 'gratitude', 'neutral']
+target_emotions = ['annoyance', 'curiosity', 'disapproval', 'neutral']
 train_path = "https://raw.githubusercontent.com/cleanlab/datasets/main/go_emotions_subset/demo_four_class_train.csv" 
 test_path = "https://raw.githubusercontent.com/cleanlab/datasets/main/go_emotions_subset/demo_four_class_test.csv" 
 train_data = pd.read_csv(train_path)
 test_data = pd.read_csv(test_path)
 # Hand-picked examples of label errors in the data (found via Cleanlab)
-train_data.iloc[[1097,4750, 5013, 7034, 8753]]
+train_data.iloc[[277,7673, 8121, 8911, 9088]]
 
 # COMMAND ----------
 
@@ -159,12 +155,12 @@ print(class_acc_str)
 # MAGIC ## How did our ML model do? (without Cleanlab)
 # MAGIC 
 # MAGIC * **Overall Test Accuracy** (without Cleanlab):
-# MAGIC   * 81.7%
+# MAGIC   * 67.5%
 # MAGIC * **Class Test Accuracies** (without Cleanlab): 
-# MAGIC   * amusement: 82.8%
-# MAGIC   * disapproval: <font color='red'>51.2%</font> <--- that's dissapointing. Can we improve?
-# MAGIC   * gratitude: 94.3%
-# MAGIC   * neutral: 88.7%
+# MAGIC   * annoyance: 84.5%
+# MAGIC   * curiosity: 61.9%
+# MAGIC   * disapproval: 61.8%
+# MAGIC   * neutral: 59.9%
 
 # COMMAND ----------
 
@@ -227,11 +223,11 @@ pred_probs = get_pred_probs()
 # MAGIC Learn more: https://docs.cleanlab.ai/stable/index.html#find-label-errors-in-your-data
 # MAGIC 
 # MAGIC 
-# MAGIC Cleanlab found <font color='red'>1,170</font> label problems using `filter_by="confident_learning"`. Let's take a look.
+# MAGIC Cleanlab found <font color='red'>1,926</font> label problems using `filter_by="confident_learning"`. Let's take a look.
 
 # COMMAND ----------
 
-cl = CleanLearning(find_label_issues_kwargs={"filter_by": "confident_learning"})
+cl = CleanLearning(find_label_issues_kwargs={"filter_by": "both", "frac_noise":0.8})
 # Label errors found automatically in this one line of code.
 df = cl.find_label_issues(labels=X_train.label.values, pred_probs=pred_probs)
 
@@ -256,17 +252,11 @@ df.sort_values(by=["label_quality"]).head()
 
 # COMMAND ----------
 
-# MAGIC %md 
-# MAGIC Second option
-# MAGIC * Pro: Clearer API 
-# MAGIC * Con: only provides index of issues
-
-# COMMAND ----------
-
 ordered_label_issues = find_label_issues(
     labels=train_data.label.values,
     pred_probs=pred_probs,
-    filter_by="confident_learning",
+    filter_by="both",
+    frac_noise = 0.8,
     return_indices_ranked_by="self_confidence",
 )
 print(f"5 comments with lowest quality labels:")
@@ -318,15 +308,15 @@ print("Class Improvement:", [f"{z:.1%}" for z in clean_class_acc - class_acc])
 # MAGIC ## How did our ML model do? (**with** Cleanlab)
 # MAGIC 
 # MAGIC * **Overall Test Accuracy** (**with** Cleanlab):
-# MAGIC   * 83.6% <font color='gree'>+2%</font>
+# MAGIC   * 69.4% <font color='gree'>+1.8%</font>
 # MAGIC 
 # MAGIC * Class Test Accuracies (**with** Cleanlab):
-# MAGIC   * amusement: 84.5% +1.7%
-# MAGIC   * disapproval: <font color='gree'>60.1% +8.9%</font>  <---  previously was <font color='red'>51.2%</font>
-# MAGIC   * gratitude: 94.3% +0%</font>
-# MAGIC   * neutral: 88.5% -0.2%
+# MAGIC   * annoyance: 85.5% <font color='gree'>+0.7%</font>
+# MAGIC   * curiosity: 60.1% <font color='gree'>+1.6%</font>
+# MAGIC   * disapproval: 94.3% <font color='gree'>+2.8%</font>
+# MAGIC   * neutral: 88.5% <font color='gree'>+2.4%</font>
 # MAGIC 
-# MAGIC Overall increase of <font color='gree'>2%</font> -- with a <font color='gree'>9%</font> increase in the `disapproval` class!
+# MAGIC Overall increase of <font color='gree'>~2%</font> -- with multiple <font color='gree'>1%-3%</font> class improvements!
 
 # COMMAND ----------
 
