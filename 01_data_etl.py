@@ -1,9 +1,9 @@
 # Databricks notebook source
-# MAGIC %pip install transformers==4.22.1
+# MAGIC %pip install transformers==4.22.1 tensorflow==2.10.0 tensorflow-datasets==4.6.0 Jinja2==3.1.2
 
 # COMMAND ----------
 
-# from transformers import pipeline
+from transformers import pipeline
 import tensorflow_datasets as tfds
 from numpy.random import RandomState
 import numpy as np
@@ -13,9 +13,9 @@ import random
 # COMMAND ----------
 
 # Get GoEmotions from tfds.
-raw_train_ds = tfds.load('goemotions', split='train')
-raw_test_ds = tfds.load('goemotions', split='test')
-raw_val_ds = tfds.load('goemotions', split='validation')
+raw_train_ds = tfds.load('goemotions', split='train', data_dir = "/databricks/driver/goemotions")
+raw_test_ds = tfds.load('goemotions', split='test', data_dir = "/databricks/driver/goemotions")
+raw_val_ds = tfds.load('goemotions', split='validation', data_dir = "/databricks/driver/goemotions")
 
 # COMMAND ----------
 
@@ -116,8 +116,11 @@ test_data_balanced = balance_neutral_class(test_data, random_state)
 
 # COMMAND ----------
 
-# These 4 datasets found here  https://github.com/cleanlab/datasets/tree/main/go_emotions_subset
-go_emot_subset_train = train_data
-go_emot_subset_test = test_data
-demo_four_class_train = train_data_balanced
-demo_four_class_test = test_data_balanced
+dbutils.fs.rm("/tmp/emotionai/", recurse=True)
+dbutils.fs.mkdirs("/tmp/emotionai/")
+train_data_balanced.to_csv("/dbfs/tmp/emotionai/train_data_balanced.csv")
+test_data_balanced.to_csv("/dbfs/tmp/emotionai/test_data_balanced.csv")
+
+# COMMAND ----------
+
+

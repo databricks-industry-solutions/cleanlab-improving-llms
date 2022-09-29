@@ -70,7 +70,7 @@ job_json = {
             {
                 "job_cluster_key": "emotion_cluster",
                 "new_cluster": {
-                    "spark_version": "10.4.x-cpu-ml-scala2.12",
+                    "spark_version": "10.4.x-scala2.12", # "11.2.x-cpu-ml-scala2.12",
                 "spark_conf": {
                     "spark.databricks.delta.formatCheck.enabled": "false"
                     },

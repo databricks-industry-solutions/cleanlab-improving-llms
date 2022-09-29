@@ -1,6 +1,9 @@
 # Databricks notebook source
-# !pip install cleanlab
-# !pip install autogluon.tabular[lightgbm,xgboost]
+# MAGIC %pip install cleanlab autogluon.tabular[lightgbm,xgboost]
+
+# COMMAND ----------
+
+import os
 from autogluon.tabular import TabularPredictor
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import confusion_matrix
@@ -12,6 +15,7 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = None
 pd.set_option("display.max_colwidth", None)
+os.chdir("/databricks/driver")
 
 # COMMAND ----------
 
@@ -76,10 +80,12 @@ pd.set_option("display.max_colwidth", None)
 
 # These are the four emotions. 
 target_emotions = ['annoyance', 'curiosity', 'disapproval', 'neutral']
-train_path = "https://raw.githubusercontent.com/cleanlab/datasets/main/go_emotions_subset/demo_four_class_train.csv" 
-test_path = "https://raw.githubusercontent.com/cleanlab/datasets/main/go_emotions_subset/demo_four_class_test.csv" 
+train_path = "/dbfs/tmp/emotionai/train_data_balanced.csv"
+test_path = "/dbfs/tmp/emotionai/test_data_balanced.csv"
 train_data = pd.read_csv(train_path)
+train_data = train_data.drop("Unnamed: 0", axis=1)
 test_data = pd.read_csv(test_path)
+test_data = test_data.drop("Unnamed: 0", axis=1)
 # Hand-picked examples of label errors in the data (found via Cleanlab)
 train_data.iloc[[277,7673, 8121, 8911, 9088]]
 
@@ -210,6 +216,7 @@ def get_pred_probs():
         pred_probs_fold = predictor.predict_proba(validation_data, as_pandas=True)
         pred_probs.iloc[val_index] = pred_probs_fold
         del pred_probs_fold
+        del predictor
     return pred_probs.values
 
 # Out-of-sample predicted probabilities
@@ -223,7 +230,7 @@ pred_probs = get_pred_probs()
 # MAGIC Learn more: https://docs.cleanlab.ai/stable/index.html#find-label-errors-in-your-data
 # MAGIC 
 # MAGIC 
-# MAGIC Cleanlab found <font color='red'>1,926</font> label problems using `filter_by="confident_learning"`. Let's take a look.
+# MAGIC Cleanlab found <font color='red'>1,896</font> label problems using `filter_by="confident_learning"`. Let's take a look.
 
 # COMMAND ----------
 
@@ -232,7 +239,7 @@ cl = CleanLearning(find_label_issues_kwargs={"filter_by": "both", "frac_noise":0
 df = cl.find_label_issues(labels=X_train.label.values, pred_probs=pred_probs)
 
 errs = sum(df.is_label_issue)
-print(f"Cleanlab found {errs} ({errs / len(df):0.1%}) potential label errors.")
+print(f"Cleanlab found {errs} ({errs / len(train_data):0.1%}) potential label errors.")
 # Replace numerical labels with emotion names and drop unused columns.
 df["given_emotion"] = df.given_label.apply(lambda x: target_emotions[x])
 df["suggested_emotion"] = df.predicted_label.apply(lambda x: target_emotions[x])
@@ -308,13 +315,13 @@ print("Class Improvement:", [f"{z:.1%}" for z in clean_class_acc - class_acc])
 # MAGIC ## How did our ML model do? (**with** Cleanlab)
 # MAGIC 
 # MAGIC * **Overall Test Accuracy** (**with** Cleanlab):
-# MAGIC   * 69.4% <font color='gree'>+1.8%</font>
+# MAGIC   * 69.4% <font color='gree'>+1.7%</font>
 # MAGIC 
 # MAGIC * Class Test Accuracies (**with** Cleanlab):
-# MAGIC   * annoyance: 85.5% <font color='gree'>+0.7%</font>
-# MAGIC   * curiosity: 60.1% <font color='gree'>+1.6%</font>
-# MAGIC   * disapproval: 94.3% <font color='gree'>+2.8%</font>
-# MAGIC   * neutral: 88.5% <font color='gree'>+2.4%</font>
+# MAGIC   * annoyance: 85.9% <font color='gree'>+1.3%</font>
+# MAGIC   * curiosity: 62.3% <font color='gree'>+0.4%</font>
+# MAGIC   * disapproval: 63.8% <font color='gree'>+2.0%</font>
+# MAGIC   * neutral: 63.0% <font color='gree'>+3.0%</font>
 # MAGIC 
 # MAGIC Overall increase of <font color='gree'>~2%</font> -- with multiple <font color='gree'>1%-3%</font> class improvements!
 
