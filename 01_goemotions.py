@@ -1,24 +1,4 @@
 # Databricks notebook source
-# MAGIC %pip install cleanlab autogluon.tabular[lightgbm,xgboost]
-
-# COMMAND ----------
-
-import os
-from autogluon.tabular import TabularPredictor
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import confusion_matrix
-from cleanlab.filter import find_label_issues
-from cleanlab.classification import CleanLearning
-from cleanlab.filter import find_label_issues
-import cleanlab
-import numpy as np
-import pandas as pd
-pd.options.mode.chained_assignment = None
-pd.set_option("display.max_colwidth", None)
-os.chdir("/databricks/driver")
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC 
 # MAGIC # Train reliable ML models to understand human emotion with [Cleanlab](https://docs.cleanlab.ai/)
@@ -54,6 +34,26 @@ os.chdir("/databricks/driver")
 
 # COMMAND ----------
 
+# MAGIC %pip install cleanlab autogluon.tabular[lightgbm,xgboost]
+
+# COMMAND ----------
+
+import os
+from autogluon.tabular import TabularPredictor
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix
+from cleanlab.filter import find_label_issues
+from cleanlab.classification import CleanLearning
+from cleanlab.filter import find_label_issues
+import cleanlab
+import numpy as np
+import pandas as pd
+pd.options.mode.chained_assignment = None
+pd.set_option("display.max_colwidth", None)
+os.chdir("/databricks/driver")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ---
 # MAGIC 
@@ -61,11 +61,37 @@ os.chdir("/databricks/driver")
 # MAGIC Download the Google Emotions dataset here: https://github.com/cleanlab/datasets/tree/main/go_emotions_subset
 # MAGIC * comments were extracted from Reddit with human annotations for 28 emotion categories. Here we select 4 of them.
 # MAGIC * we augmented the dataset by adding the sentiment for every comment (thanks [HuggingFace](https://huggingface.co/docs/transformers/v4.22.1/en/main_classes/pipelines#transformers.pipeline.example) 🤗)
-# MAGIC 
-# MAGIC Datasets:<br>
-# MAGIC * `demo_four_class_train.csv`
-# MAGIC * `demo_four_class_test.csv`
-# MAGIC 
+
+# COMMAND ----------
+
+# MAGIC %run /util/data_etl
+
+# COMMAND ----------
+
+import os
+from autogluon.tabular import TabularPredictor
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix
+from cleanlab.filter import find_label_issues
+from cleanlab.classification import CleanLearning
+from cleanlab.filter import find_label_issues
+import cleanlab
+import numpy as np
+import pandas as pd
+pd.options.mode.chained_assignment = None
+pd.set_option("display.max_colwidth", None)
+os.chdir("/databricks/driver")
+
+# COMMAND ----------
+
+# These are the four emotions. 
+target_emotions = ['annoyance', 'curiosity', 'disapproval', 'neutral']
+train_path = "/dbfs/tmp/emotionai/train_data_balanced.csv"
+test_path = "/dbfs/tmp/emotionai/test_data_balanced.csv"
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC Both datasets contain 4 columns:
 # MAGIC 
 # MAGIC * `comment_text`: the text of the comment, with masked tokens for names, private info, etc.
@@ -74,20 +100,15 @@ os.chdir("/databricks/driver")
 # MAGIC * `emotion`: text representation of the label 
 # MAGIC 
 # MAGIC 
-# MAGIC # Let's look at some hand-picked examples from the dataset:
+# MAGIC # 
 
 # COMMAND ----------
 
-# These are the four emotions. 
-target_emotions = ['annoyance', 'curiosity', 'disapproval', 'neutral']
-train_path = "/dbfs/tmp/emotionai/train_data_balanced.csv"
-test_path = "/dbfs/tmp/emotionai/test_data_balanced.csv"
-train_data = pd.read_csv(train_path)
-train_data = train_data.drop("Unnamed: 0", axis=1)
-test_data = pd.read_csv(test_path)
-test_data = test_data.drop("Unnamed: 0", axis=1)
+# DBTITLE 1,Let's look at some hand-picked examples from the dataset:
+train_data = pd.read_csv(train_path).drop("Unnamed: 0", axis=1)
+test_data = pd.read_csv(test_path).drop("Unnamed: 0", axis=1)
 # Hand-picked examples of label errors in the data (found via Cleanlab)
-train_data.iloc[[277,7673, 8121, 8911, 9088]]
+display(train_data.iloc[[277,7673, 8121, 8911, 9088]])
 
 # COMMAND ----------
 

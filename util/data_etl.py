@@ -9,6 +9,7 @@ from numpy.random import RandomState
 import numpy as np
 import pandas as pd
 import random
+tfds.disable_progress_bar()
 
 # COMMAND ----------
 
