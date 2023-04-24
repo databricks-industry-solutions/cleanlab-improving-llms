@@ -3,7 +3,7 @@
 # MAGIC 🎉
 # MAGIC 
 # MAGIC **Steps**
-# MAGIC 1. Simply attach this notebook to a cluster with DBR 11.0 and above, and hit Run-All for this notebook. A multi-step job and the clusters used in the job will be created for you and hyperlinks are printed on the last block of the notebook. 
+# MAGIC 1. Simply attach this notebook to a cluster and hit Run-All for this notebook. A multi-step job and the clusters used in the job will be created for you and hyperlinks are printed on the last block of the notebook. 
 # MAGIC 
 # MAGIC 2. Run the accelerator notebooks: Feel free to explore the multi-step job page and **run the Workflow**, or **run the notebooks interactively** with the cluster to see how this solution accelerator executes. 
 # MAGIC 
@@ -64,34 +64,19 @@ job_json = {
             {
                 "job_cluster_key": "emotion_cluster",
                 "notebook_task": {
-                    "notebook_path": f"01_data_etl",
+                    "notebook_path": f"01_Cleanlab_with_Amazon_Reviews",
                     "base_parameters": {
                         "env": "test"
                     }
                 },
-                "task_key": "emotion_00"
+                "task_key": "emotion_01"
             },
-            {
-                "job_cluster_key": "emotion_cluster",
-                "notebook_task": {
-                    "notebook_path": f"02_goemotions",
-                    "base_parameters": {
-                        "env": "test"
-                    }
-                },
-                "task_key": "emotion_01",
-                "depends_on": [
-                    {
-                        "task_key": "emotion_00"
-                    }
-                ]
-            }
         ],
         "job_clusters": [
             {
                 "job_cluster_key": "emotion_cluster",
                 "new_cluster": {
-                    "spark_version": "10.4.x-scala2.12", # "11.2.x-cpu-ml-scala2.12",
+                    "spark_version": "12.2.x-cpu-ml-scala2.12", 
                 "spark_conf": {
                     "spark.databricks.delta.formatCheck.enabled": "false"
                     },
