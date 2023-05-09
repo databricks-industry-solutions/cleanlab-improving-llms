@@ -313,9 +313,9 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 
 # COMMAND ----------
 
-# cleanset_id = 'PASTE CLEANSET ID HERE'
-# politeness_train_fixed = studio.apply_corrections(cleanset_id, politeness_train)
-# display(politeness_train_fixed)
+cleanset_id = '7b27d51ba79b4087b32b3f064f87a47b'  # paste your own Cleanset ID here
+politeness_train_fixed = studio.apply_corrections(cleanset_id, politeness_train)
+display(politeness_train_fixed)
 
 # COMMAND ----------
 
@@ -381,11 +381,6 @@ else:
 
 # MAGIC %md
 # MAGIC Once the job completes, we see the test accuracy achieved when fine-tuning this LLM on the improved dataset. If you simply auto-fixed some of the labels (spending zero human time on data improvement), you'll still see improvement; if you reviewed some of Cleanlab Studio's suggestions following a human-in-the-loop data cleaning process, you'll see large improvements here.
-
-# COMMAND ----------
-
-# change to True to load dataset from our 
-
 
 # COMMAND ----------
 
