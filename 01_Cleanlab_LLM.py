@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Better Large Language Models (LLMs) With Better Data
 # MAGIC
-# MAGIC This notebook demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality.
+# MAGIC This notebook demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/improving-llms-cleanlab.
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -15,8 +15,6 @@
 # MAGIC <!-- <img src="./images/comparison.png" width="958"> -->
 # MAGIC <!-- temp URL below -->
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
-# MAGIC
-# MAGIC ### TODO link "blog post" below
 # MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
