@@ -291,7 +291,11 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC Select fast mode or regular mode depending on the speed/quality tradeoff you desire.
 # MAGIC
-# MAGIC ![](https://i.imgur.com/WjFTQms.png)
+# MAGIC ### TODO update screenshot URL below once repo is public
+# MAGIC
+# MAGIC ![](./screenshots/create-project.png)
+# MAGIC <!-- temp URL below -->
+# MAGIC ![](https://s.anish.io/screenshots/create-project.png)
 
 # COMMAND ----------
 
@@ -302,7 +306,23 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC If you want to save time, you could briefly review some flagged issues, and then auto-fix the top issues.
 # MAGIC
-# MAGIC ![](https://i.imgur.com/EUNueDg.png)
+# MAGIC ### TODO update screenshot URL below once repo is public
+# MAGIC
+# MAGIC ![](./screenshots/make-corrections.png)
+# MAGIC <!-- temp URL below -->
+# MAGIC ![](https://s.anish.io/screenshots/make-corrections.png)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC The selected row in the screenshot above is an example of a poorly-labeled datapoint. The phrase:
+# MAGIC
+# MAGIC > I’ll take a look at getLogEntries when I have time. Would you mind adding me as a committer?
+# MAGIC
+# MAGIC is labeled "impolite". Cleanlab Studio flags this as a label error, and it suggests that the label be switched to "polite". In the screenshot above, we pressed "W" to accept Cleanlab Studio's suggestion to automatically fix the label.
+# MAGIC
+# MAGIC Label issues like this cause the accuracy of the fine-tuned LLM to be degraded; correcting these issues allows us to train an improved LLM, as we'll see below.
 
 # COMMAND ----------
 
