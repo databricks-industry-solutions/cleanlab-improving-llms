@@ -12,8 +12,11 @@
 # MAGIC
 # MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time on manually reviewing data). We see a performance of 37% when using Cleanlab Studio to improve the dataset:
 # MAGIC
-# MAGIC # TODO: update chart and remove middle bar
-# MAGIC ![](https://i.imgur.com/ZQ9WijM.png)
+# MAGIC ### TODO update screenshot URL below once repo is public
+# MAGIC
+# MAGIC <!-- <img src="./images/comparison.png" width="958"> -->
+# MAGIC <!-- temp URL below -->
+# MAGIC <img src="https://s.anish.io/images/comparison.png" width="958">
 # MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
@@ -293,9 +296,9 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC ### TODO update screenshot URL below once repo is public
 # MAGIC
-# MAGIC ![](./screenshots/create-project.png)
+# MAGIC <!-- <img src="./images/create-project.png" width="1440"> -->
 # MAGIC <!-- temp URL below -->
-# MAGIC ![](https://s.anish.io/screenshots/create-project.png)
+# MAGIC <img src="https://s.anish.io/images/create-project.png" width="1440">
 
 # COMMAND ----------
 
@@ -308,9 +311,9 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC ### TODO update screenshot URL below once repo is public
 # MAGIC
-# MAGIC ![](./screenshots/make-corrections.png)
+# MAGIC <!-- <img src="./images/make-corrections.png" width="1523"> -->
 # MAGIC <!-- temp URL below -->
-# MAGIC ![](https://s.anish.io/screenshots/make-corrections.png)
+# MAGIC <img src="https://s.anish.io/images/make-corrections.png" width="1523">
 
 # COMMAND ----------
 
