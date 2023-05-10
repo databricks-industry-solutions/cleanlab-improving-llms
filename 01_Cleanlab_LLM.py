@@ -2,15 +2,15 @@
 # MAGIC %md
 # MAGIC # Better Large Language Models (LLMs) With Better Data
 # MAGIC
-# MAGIC This notebook demonstrates how to fine-tune large language models (LLMs) from your Databricks Notebooks, and how Databricks can integrate with [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) that can improve the performance of your LLMs by improving the data quality.
+# MAGIC This notebook demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality.
 # MAGIC
 # MAGIC ---
 # MAGIC
 # MAGIC This notebook focuses on _fine-tuning LLMs_. LLMs acquire powerful generative and discriminative capabilities after being pre-trained on a large corpus of text (usually scraped from the internet), but producing reliable outputs for a particular business use case often requires additional training on a labeled data set from the application domain. This domain-specific training is known as _fine-tuning_ the LLM.
 # MAGIC
-# MAGIC Labeled data powers AI/ML in the enterprise, but real-world datasets have been found to contain between 7-50% annotation errors. Imperfectly-labeled text data hampers the training (and evaluation of) ML models across tasks like intent recognition, entity recognition, and sequence generation. Although pretrained LLMs are equipped with a lot of world knowledge, their performance is adversely affected by noisy training data (as [noted by OpenAI](https://openai.com/research/dall-e-2-pre-training-mitigations)).  This notebook illustrate data-centric techniques to mitigate the effect of low-quality data without changing any code related to model architecture, hyperparameters, or training. These data quality improvement techniques should thus remain applicable even for future advanced LLMs like GPT-10.
+# MAGIC Labeled data powers AI/ML in the enterprise, but real-world datasets have been found to [contain between 7-50% annotation errors](https://go.cloudfactory.com/hubfs/02-Contents/3-Reports/Crowd-vs-Managed-Team-Hivemind-Study.pdf). Imperfectly-labeled text data hampers the training (and evaluation of) ML models across tasks like intent recognition, entity recognition, and sequence generation. Although pretrained LLMs are equipped with a lot of world knowledge, their performance is adversely affected by noisy training data (as [noted by OpenAI](https://openai.com/research/dall-e-2-pre-training-mitigations)).  This notebook illustrates data-centric techniques to mitigate the effect of low-quality data without changing any code related to model architecture, hyperparameters, or training. These data quality improvement techniques should thus remain applicable even for future advanced LLMs like GPT-10.
 # MAGIC
-# MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time on manually reviewing data). We see a performance of 37% when using Cleanlab Studio to improve the dataset:
+# MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
 # MAGIC
 # MAGIC ### TODO update screenshot URL below once repo is public
 # MAGIC
@@ -22,7 +22,7 @@
 # MAGIC
 # MAGIC ---
 # MAGIC
-# MAGIC We will use Cleanlab Studio to enhance data quality in this notebook. If you don't have a Cleanlab Studio account already, [sign up for an account here](https://app.cleanlab.ai/). It may take up to one day to get access.
+# MAGIC This notebook uses Cleanlab Studio to enhance data quality. If you don't have a Cleanlab Studio account already, [sign up for an account here](https://app.cleanlab.ai/). It may take up to one day to get access.
 
 # COMMAND ----------
 
@@ -40,7 +40,7 @@
 # MAGIC %md
 # MAGIC ### Configure OpenAI API key
 # MAGIC
-# MAGIC Note that invoking the OpenAI API will use credits or bill you. The estimated cost to run this notebook is $15 with the Davinci model, which is the most powerful but also the most expensive. You can also scale down to the Curie or Ada model to reduce the cost, by replacing "davinci" with "curie" or "ada" in the invocations of the fine-tuning API. Fine-tuning on the Ada model costs about $1 per run with the given dataset.
+# MAGIC Note that invoking the OpenAI API will use credits or bill you. The estimated cost to run this notebook is $15 with the Davinci model, which is the most powerful but also the most expensive. You can also scale down to the Curie or Ada model to reduce the cost, by setting `openai_model` in the cell below, replacing "davinci" with "curie" or "ada". Fine-tuning on the Ada model costs about $1 per run with the given dataset.
 # MAGIC
 # MAGIC Put your OpenAI API key in the cell below. You can find your API key at https://platform.openai.com/account/api-keys. Here we have saved the key in a secret scope - see the `RUNME` notebook in this repository for helper scripts to set up the secret scope.
 
@@ -50,11 +50,11 @@ import openai
 import os
 
 # we set the environment variable because it is used by the OpenAI command-line tool
-os.environ['OPENAI_API_KEY'] = dbutils.secrets.get("solution-accelerator-cicd","openai_api")
+os.environ['OPENAI_API_KEY'] = dbutils.secrets.get("solution-accelerator-cicd","openai_api")  # put your OpenAI API key here
 # we also set the .api_key property below for the Python API
 openai.api_key = os.environ['OPENAI_API_KEY']
 # set openai model name
-openai_model = 'curie'
+openai_model = 'davinci'
 
 # COMMAND ----------
 
@@ -65,7 +65,7 @@ openai_model = 'curie'
 # MAGIC
 # MAGIC The training dataset has 1916 examples each labeled by a single human annotator, and thus some may be unreliable.
 # MAGIC
-# MAGIC The test dataset has 480 examples each labeled by 5 annotators, and we use their consensus label as a high-quality approximation of the true politeness (measuring test accuracy against these consensus labels). To ensure a fair comparison, this test dataset remains fixed throughout the experiments in this notebook (all data cleaning is done only for the training set).
+# MAGIC The test dataset has 480 examples each labeled by 5 annotators, and we use their consensus label as a high-quality approximation of the true politeness (measuring test accuracy against these consensus labels). To ensure a fair comparison, this test dataset remains fixed throughout the experiments in this notebook (all data quality improvement is done only for the training set).
 # MAGIC
 # MAGIC To prepare the data, we download raw data into [DBFS](https://docs.databricks.com/dbfs/index.html), load it into PySpark DataFrames, and do some processing to prepare the dataset for the downstream task.
 
@@ -125,7 +125,7 @@ politeness_test = with_id_column(politeness_test_raw)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC We can inspect this prepared data, looking at some specific rows to highlight data errors that are present. For example, the data point with ID `1426` is erroneously labeled "impolite".
+# MAGIC We can inspect this prepared data, looking at some specific rows to highlight data errors that are present. For example, the data point with ID `1426` is erroneously labeled "impolite" when "polite" is a more appropriate label.
 
 # COMMAND ----------
 
@@ -136,7 +136,7 @@ display(politeness_train.where((politeness_train.id == 1426) | (politeness_train
 # MAGIC %md
 # MAGIC ### Formatting data for fine-tuning
 # MAGIC
-# MAGIC We are using the OpenAI APIs for fine-tuning, which require data in a specific format (JSONL). We also need to do some pre-processing of the label column, adding whitespace before the completion, as the API recommends.
+# MAGIC We are using the OpenAI APIs for fine-tuning, which require data in a specific format (JSONL, newline-delimited JSON objects). We also need to do some pre-processing of the label column, adding whitespace before the completion, as the API recommends.
 # MAGIC
 # MAGIC We save the prepared results into DBFS, so that the result files can be used by the OpenAI API.
 
@@ -148,7 +148,7 @@ def prepare_data(df, path):
 
     This makes a small tweak to the data, namely, adding whitespace before the completion.
 
-    By default, spark writes the dataset into multiple files for efficiency, but we need a single file to pass to the OpenAI command-line tool.
+    We don't need the full power of Spark's parallel and distributed processing for this small demo dataset, but you would want to leverage it for any large real-world datasets. Our small dataset lives in a single partition, but larger datasets would have multiple partitions. By default, Spark writes the dataset into multiple files for efficiency (each partition corresponds to a separate file), but we need a single file to pass to the OpenAI command-line tool. This function ensures that a single JSONL file containing all of the data is produced as the final result.
     '''
     # add whitespace to the completion, as OpenAI requires
     df = df.withColumn('completion', F.format_string(' %s', 'completion'))
@@ -159,10 +159,11 @@ def prepare_data(df, path):
     df.coalesce(1).write.mode('overwrite').json(temp_dir)
     # Spark saves the JSON file in a directory, along with some other files we don't need anymore
     all_files = dbutils.fs.ls(temp_dir)
+    # move the .json file to the output destination
     for f in all_files:
         if f.path.endswith('.json'):
             dbutils.fs.mv(f.path, path)
-    # remove all the files we don't need
+    # remove all the other files, which we don't need
     dbutils.fs.rm(temp_dir, recurse=True)
 
 # COMMAND ----------
@@ -173,7 +174,7 @@ prepare_data(politeness_test, f'{data_path}/processed/test.jsonl')
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Fine-Tune and Evaluate OpenAI Model without Cleanlab Studio (accuracy 63%)
+# MAGIC ## Fine-Tune and evaluate OpenAI model without Cleanlab Studio (accuracy 64%)
 # MAGIC
 # MAGIC We use the [OpenAI fine-tuning API](https://platform.openai.com/docs/guides/fine-tuning) to first establish a baseline by:
 # MAGIC
@@ -182,8 +183,22 @@ prepare_data(politeness_test, f'{data_path}/processed/test.jsonl')
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC
+# MAGIC First, we upload our training set and test set to OpenAI:
+
+# COMMAND ----------
+
 train_file = openai.File.create(file=open(f'/dbfs/{data_path}/processed/train.jsonl', 'rb'), purpose='fine-tune')
 test_file = openai.File.create(file=open(f'/dbfs/{data_path}/processed/test.jsonl', 'rb'), purpose='fine-tune')
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC Then, we invoke the fine-tuning API to fine tune the `openai_model` ("davinci" by default, unless you changed it above). Note that this incurs some [cost](https://openai.com/pricing), roughly $7.50 for the Davinci model or $0.50 for the Ada model, at the time this notebook was written.
+# MAGIC
+# MAGIC We also invoke the fine-tuning API with the `validation_file` keyword argument, so that the API will automatically compute statistics including model accuracy on the test set after the fine-tuning process.
 
 # COMMAND ----------
 
@@ -235,20 +250,17 @@ print(f"Fine-tuning Accuracy: {baseline_acc:.1%}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Our baseline Davinci LLM achieves a test accuracy of 63% when fine-tuned on the original training data. Even a state-of-the-art LLM like the Davinci model produces lackluster results for this classification task; is it because of low data quality? 
 # MAGIC
-# MAGIC TODO: talk about how individual run performance may vary. History: 
+# MAGIC ### Baseline results: 65% accuracy
 # MAGIC
-# MAGIC davinci 'ft-WXKwsuxRpbDXWc3MRhWDoAuE': 65%
+# MAGIC Our baseline Davinci LLM achieves a **test accuracy of 65%** when fine-tuned on the original training data (Curie achieved 64% accuracy, Ada achieved 60% accuracy). Model training is nondeterministic, so your results might vary slightly, even with the exact same dataset and initial model checkpoint. OpenAI's models might also be changed/updated over time.
 # MAGIC
-# MAGIC ada 60%
-# MAGIC
-# MAGIC Curie 64.2%
+# MAGIC Even a state-of-the-art LLM like the Davinci model produces lackluster results for this classification task; is it because of low data quality? 
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Improve the data using Cleanlab Studio and re-train the LLM (accuracy 73%)
+# MAGIC ## Improve the data using Cleanlab Studio and re-train the LLM (accuracy 78%)
 # MAGIC
 # MAGIC Next, we use the [Databricks connector](https://github.com/cleanlab/cleanlab-studio) for [Cleanlab Studio](https://app.cleanlab.ai/) to automatically improve the data quality, and then re-train our LLM.
 
@@ -267,7 +279,7 @@ import cleanlab_studio
 
 # COMMAND ----------
 
-CLEANLAB_STUDIO_API_KEY = dbutils.secrets.get("solution-accelerator-cicd","cleanlab_api")
+CLEANLAB_STUDIO_API_KEY = dbutils.secrets.get("solution-accelerator-cicd","cleanlab_api")  # put your Cleanlab Studio API key here
 studio = cleanlab_studio.Studio(CLEANLAB_STUDIO_API_KEY)
 
 # COMMAND ----------
@@ -283,7 +295,7 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Create a Project
+# MAGIC ### Create a project
 # MAGIC
 # MAGIC To analyze the data, use the [Cleanlab Studio web UI](https://app.cleanlab.ai/) to create a project, configuring it according to the ML task. For this demo, you should select:
 # MAGIC
@@ -325,14 +337,18 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC is labeled "impolite". Cleanlab Studio flags this as a label error, and it suggests that the label be switched to "polite". In the screenshot above, we pressed "W" to accept Cleanlab Studio's suggestion to automatically fix the label.
 # MAGIC
-# MAGIC Label issues like this cause the accuracy of the fine-tuned LLM to be degraded; correcting these issues allows us to train an improved LLM, as we'll see below.
+# MAGIC Label issues like this cause the accuracy of the fine-tuned LLM to be degraded. Correcting these issues allows us to train an improved LLM, as we'll see below.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Export your improved dataset back to Databricks
+# MAGIC ### Export your improved dataset back into Databricks
 # MAGIC
-# MAGIC Once you're done correcting issues found in your dataset with Cleanlab Studio, export the improved dataset by clicking on the "Export Cleanset" button within your Cleanlab Studio project. Next select the "Export using API" tab and copy the "cleanset ID" and paste it in the cell below.
+# MAGIC Once you're done correcting issues found in your dataset with Cleanlab Studio, export the improved dataset back into Databricks:
+# MAGIC
+# MAGIC 1. Click on the "Export Cleanset" button in your Cleanlab Studio project
+# MAGIC 2. Select the "Export using API" tab
+# MAGIC 3. Copy the "cleanset ID" and paste it into the cell below
 
 # COMMAND ----------
 
@@ -403,7 +419,7 @@ else:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Once the job completes, we see the test accuracy achieved when fine-tuning this LLM on the improved dataset. If you simply auto-fixed some of the labels (spending zero human time on data improvement), you'll still see improvement; if you reviewed some of Cleanlab Studio's suggestions following a human-in-the-loop data cleaning process, you'll see large improvements here.
+# MAGIC Once the job completes, we see the test accuracy achieved when fine-tuning this LLM on the improved dataset. If you simply auto-fixed some of the labels (spending zero human time on data improvement), you'll still see improvement; if you reviewed some of Cleanlab Studio's suggestions following a human-in-the-loop data cleaning process, you'll see larger improvements here.
 
 # COMMAND ----------
 
@@ -415,21 +431,18 @@ print(f"Fine-tuning Accuracy: {fixed_acc:.1%}")
 
 # COMMAND ----------
 
-# MAGIC %md TODO: 
+# MAGIC %md
+# MAGIC ### Impact of improved data: 78% accuracy (compared to 65% baseline accuracy)
 # MAGIC
-# MAGIC Talk about performance for different models
+# MAGIC Training on the improved dataset, we see a **test accuracy of 78%** for the Davinci model (Curie achieved 76% accuracy, Ada achieved 75% accuracy). These results are from our `train_fixed.csv` (provided above); results on your dataset will vary depending on how you improved the dataset using Cleanlab Studio (e.g., whether you used auto-fix or manually reviewed the top issues, how you corrected labels, how you removed outliers, etc.). Even the results of fine-tuning on the provided dataset might vary slightly, because model training is nondeterministic, and OpenAI's initial model checkpoints may be updated over time.
 # MAGIC
-# MAGIC davinci 77.9%
-# MAGIC
-# MAGIC ada 74.8%
-# MAGIC
-# MAGIC Curie 75.8%
+# MAGIC In this evaluation, we see that data quality has a huge impact on LLM performance. **By simply improving the data quality** (and leaving the original LLM checkpoint, training parameters, fine-tuning process, etc. as-is), we have **reduced prediction error by 37%**.
 
 # COMMAND ----------
 
 # MAGIC %md
 # MAGIC # Takeaways: what should I do differently going forward?
 # MAGIC
-# MAGIC Data-centric AI is a powerful paradigm for handling noisy data via AI/automated techniques rather than the tedious manual effort data scientists often dread. Tools like [Cleanlab Studio](https://app.cleanlab.ai/) help you efficiently find and fix data and label issues that can be used to improve any ML model (not just LLMs) for most types of data (not just text, but also images, audio, tabular data, etc). Cleanlab Studio improves your data without requiring that you write code or have any ML expertise.
+# MAGIC [Data-centric AI](https://dcai.csail.mit.edu/) is a powerful paradigm for dealing with erroneous or noisy data via AI/automated techniques rather than the tedious manual effort data scientists often dread. Tools like [Cleanlab Studio](https://app.cleanlab.ai/) help you efficiently find and fix data and label issues that can be used to improve any ML model (not just LLMs) for most types of data (not just text, but also images, audio, tabular data, etc). Cleanlab Studio improves your data without requiring that you write code or have any ML expertise.
 # MAGIC
-# MAGIC These sorts of tools will still remain applicable with future advances in ML models like GPT-10, and will only become better at identifying issues when used with more accurate models!  Practice data-centric AI to systematically engineer better data via AI/automation. This frees you to capitalize on your unique domain knowledge rather than fixing general data issues like label errors.
+# MAGIC These sorts of tools will still remain applicable with future advances in ML models like GPT-10, and will only become better at identifying issues when used with more accurate models! Practice data-centric AI to systematically engineer better data via AI/automation. This frees you to capitalize on your unique domain knowledge rather than fixing general data issues like label errors.
