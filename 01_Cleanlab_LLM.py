@@ -18,6 +18,8 @@
 # MAGIC <!-- temp URL below -->
 # MAGIC <img src="https://s.anish.io/images/comparison.png" width="958">
 # MAGIC
+# MAGIC ### TODO link "blog post" below
+# MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
 # MAGIC ---
