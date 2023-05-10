@@ -64,29 +64,27 @@ job_json = {
         "max_concurrent_runs": 1,
         "tags": {
             "usage": "solacc_testing",
-            "group": "CME"
+            "group": "CME",
+            "accelerator": "improving-llms-cleanlab"
         },
         "tasks": [
             {
-                "job_cluster_key": "emotion_cluster",
+                "job_cluster_key": "cleanlab_llm_cluster",
                 "notebook_task": {
-                    "notebook_path": f"01_Cleanlab_with_Amazon_Reviews",
-                    "base_parameters": {
-                        "env": "test"
-                    }
+                    "notebook_path": f"01_Cleanlab_LLM"
                 },
-                "task_key": "emotion_01"
+                "task_key": "cleanlab_llm_01"
             },
         ],
         "job_clusters": [
             {
-                "job_cluster_key": "emotion_cluster",
+                "job_cluster_key": "cleanlab_llm_cluster",
                 "new_cluster": {
                     "spark_version": "12.2.x-cpu-ml-scala2.12", 
                 "spark_conf": {
                     "spark.databricks.delta.formatCheck.enabled": "false"
                     },
-                    "num_workers": 2,
+                    "num_workers": 1,
                     "node_type_id": {"AWS": "i3.xlarge", "MSA": "Standard_DS3_v2", "GCP": "n1-highmem-4"}, # different from standard API,
                     "custom_tags": {
                         "usage": "solacc_testing"

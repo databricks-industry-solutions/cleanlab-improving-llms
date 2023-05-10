@@ -12,11 +12,9 @@
 # MAGIC
 # MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
 # MAGIC
-# MAGIC ### TODO update screenshot URL below once repo is public
-# MAGIC
 # MAGIC <!-- <img src="./images/comparison.png" width="958"> -->
 # MAGIC <!-- temp URL below -->
-# MAGIC <img src="https://s.anish.io/images/comparison.png" width="958">
+# MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
 # MAGIC
 # MAGIC ### TODO link "blog post" below
 # MAGIC
@@ -221,18 +219,19 @@ response = openai.FineTune.create(
 # COMMAND ----------
 
 import time
-job_id = response.id
 
-status = openai.FineTune.retrieve(id=job_id)["status"]
-if status not in ["succeeded", "failed"]:
-    print(f'Job not in terminal status: {status}. Waiting.')
-    while status not in ["succeeded", "failed"]:
-        time.sleep(60)
-        status = openai.FineTune.retrieve(id=job_id)["status"]
-        print(f'Status: {status}')
-else:
-    print(f'Finetune job {job_id} finished with status: {status}')
-
+def wait_for_finetune(job_id):
+  status = openai.FineTune.retrieve(id=job_id)["status"]
+  if status not in ["succeeded", "failed"]:
+      print(f'Job not in terminal status: {status}. Waiting.')
+      while status not in ["succeeded", "failed"]:
+          time.sleep(60)
+          status = openai.FineTune.retrieve(id=job_id)["status"]
+          print(f'Status: {status}')
+  else:
+      print(f'Finetune job {job_id} finished with status: {status}')
+      
+wait_for_finetune(response.id)
 
 # COMMAND ----------
 
@@ -268,7 +267,7 @@ print(f"Fine-tuning Accuracy: {baseline_acc:.1%}")
 
 # COMMAND ----------
 
-!pip install cleanlab-studio
+!pip install --upgrade cleanlab-studio
 import cleanlab_studio
 
 # COMMAND ----------
@@ -308,11 +307,7 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC Select fast mode or regular mode depending on the speed/quality tradeoff you desire.
 # MAGIC
-# MAGIC ### TODO update screenshot URL below once repo is public
-# MAGIC
-# MAGIC <!-- <img src="./images/create-project.png" width="1440"> -->
-# MAGIC <!-- temp URL below -->
-# MAGIC <img src="https://s.anish.io/images/create-project.png" width="1440">
+# MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/create-project.png" width="1440">
 
 # COMMAND ----------
 
@@ -323,11 +318,7 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # MAGIC
 # MAGIC If you want to save time, you could briefly review some flagged issues, and then auto-fix the top issues.
 # MAGIC
-# MAGIC ### TODO update screenshot URL below once repo is public
-# MAGIC
-# MAGIC <!-- <img src="./images/make-corrections.png" width="1523"> -->
-# MAGIC <!-- temp URL below -->
-# MAGIC <img src="https://s.anish.io/images/make-corrections.png" width="1523">
+# MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/make-corrections.png" width="1523">
 
 # COMMAND ----------
 
@@ -400,23 +391,11 @@ response_fixed = openai.FineTune.create(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC You can follow the progress of fine-tuning with the following command. Once it's done, it'll print "Job complete!". You might need to re-run the cell if it times out. Training time varies based on queue length and other factors; it can take up to 1 hour to fine-tune the LLM.
+# MAGIC You can follow the progress of fine-tuning with the following command. Once it's done, it'll print "Job complete!". You might need to re-run the cell if it times out. Training time varies based on queue length and other factors; it can take up to 1 hour to fine-tune the LLM. We use the `wait_for_finetune` function defined before to block this step until the finetuning is done.
 
 # COMMAND ----------
 
-import time
-job_id = response_fixed.id
-
-status = openai.FineTune.retrieve(id=job_id)["status"]
-if status not in ["succeeded", "failed"]:
-    print(f'Job not in terminal status: {status}. Waiting.')
-    while status not in ["succeeded", "failed"]:
-        time.sleep(60)
-        status = openai.FineTune.retrieve(id=job_id)["status"]
-        print(f'Status: {status}')
-else:
-    print(f'Finetune job {job_id} finished with status: {status}')
-
+wait_for_finetune(response_fixed.id)
 
 # COMMAND ----------
 
