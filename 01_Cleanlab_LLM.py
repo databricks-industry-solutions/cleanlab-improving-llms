@@ -172,7 +172,7 @@ prepare_data(politeness_test, f'{data_path}/processed/test.jsonl')
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Fine-Tune and evaluate OpenAI model without Cleanlab Studio (accuracy 64%)
+# MAGIC ## Fine-Tune and evaluate OpenAI model without Cleanlab Studio (accuracy 65%)
 # MAGIC
 # MAGIC We use the [OpenAI fine-tuning API](https://platform.openai.com/docs/guides/fine-tuning) to first establish a baseline by:
 # MAGIC
