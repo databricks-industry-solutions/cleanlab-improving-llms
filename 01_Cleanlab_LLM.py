@@ -12,7 +12,7 @@
 # MAGIC
 # MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
 # MAGIC
-# MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
+# MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="957">
 # MAGIC
 # MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models). 
 # MAGIC
