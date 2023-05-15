@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Better Large Language Models (LLMs) With Better Data
 # MAGIC
-# MAGIC This notebook (and accompanying [video tutorial](https://www.youtube.com/watch?v=HnC6DwdV4EE)) demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/improving-llms-cleanlab.
+# MAGIC This notebook (and accompanying [video tutorial](https://www.youtube.com/watch?v=HnC6DwdV4EE)) demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/cleanlab-improving-llms.
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -14,7 +14,7 @@
 # MAGIC
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
 # MAGIC
-# MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models).
+# MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models). 
 # MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
@@ -48,7 +48,7 @@ import openai
 import os
 
 # we set the environment variable because it is used by the OpenAI command-line tool
-os.environ['OPENAI_API_KEY'] = dbutils.secrets.get("solution-accelerator-cicd","openai_api")  # put your OpenAI API key here
+os.environ['OPENAI_API_KEY'] = dbutils.secrets.get("solution-accelerator-cicd","openai_api")  # See the RUNME notebook to setup your OpenAI API key in a secret scope
 # we also set the .api_key property below for the Python API
 openai.api_key = os.environ['OPENAI_API_KEY']
 # set openai model name
@@ -74,8 +74,8 @@ openai_model = 'davinci'
 # MAGIC rm -rf /tmp/stanford-politeness
 # MAGIC mkdir -p /tmp/stanford-politeness
 # MAGIC cd /tmp/stanford-politeness
-# MAGIC curl --silent -L https://s.cleanlab.ai/stanford-politeness/fine-tuning/train.csv -o train.csv
-# MAGIC curl --silent -L https://s.cleanlab.ai/stanford-politeness/fine-tuning/test.csv -o test.csv
+# MAGIC curl --silent -L https://raw.githubusercontent.com/databricks-industry-solutions/cleanlab-improving-llms/main/data/train.csv -o train.csv
+# MAGIC curl --silent -L https://raw.githubusercontent.com/databricks-industry-solutions/cleanlab-improving-llms/main/data/test.csv -o test.csv
 # MAGIC
 # MAGIC # move the dataset to our main bucket
 # MAGIC rm -rf /dbfs/solacc/product/llm/stanford-politeness/raw
@@ -172,7 +172,7 @@ prepare_data(politeness_test, f'{data_path}/processed/test.jsonl')
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Fine-Tune and evaluate OpenAI model without Cleanlab Studio (accuracy 65%)
+# MAGIC ## Fine-Tune and evaluate OpenAI model without Cleanlab Studio (accuracy ~65%)
 # MAGIC
 # MAGIC We use the [OpenAI fine-tuning API](https://platform.openai.com/docs/guides/fine-tuning) to first establish a baseline by:
 # MAGIC
@@ -250,7 +250,7 @@ print(f"Fine-tuning Accuracy: {baseline_acc:.1%}")
 
 # MAGIC %md
 # MAGIC
-# MAGIC ### Baseline results: 65% accuracy
+# MAGIC ### Baseline results: ~65% accuracy
 # MAGIC
 # MAGIC Our baseline Davinci LLM achieves a **test accuracy of 65%** when fine-tuned on the original training data (Curie achieved 64% accuracy, Ada achieved 60% accuracy). Model training is nondeterministic, so your results might vary slightly, even with the exact same dataset and initial model checkpoint. OpenAI's models might also be changed/updated over time.
 # MAGIC
@@ -259,7 +259,7 @@ print(f"Fine-tuning Accuracy: {baseline_acc:.1%}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Improve the data using Cleanlab Studio and re-train the LLM (accuracy 78%)
+# MAGIC ## Improve the data using Cleanlab Studio and re-train the LLM (accuracy ~78%)
 # MAGIC
 # MAGIC Next, we use the [Databricks connector](https://github.com/cleanlab/cleanlab-studio) for [Cleanlab Studio](https://app.cleanlab.ai/) to automatically improve the data quality, and then re-train our LLM.
 
@@ -278,7 +278,7 @@ import cleanlab_studio
 
 # COMMAND ----------
 
-CLEANLAB_STUDIO_API_KEY = dbutils.secrets.get("solution-accelerator-cicd","cleanlab_api")  # put your Cleanlab Studio API key here
+CLEANLAB_STUDIO_API_KEY = dbutils.secrets.get("solution-accelerator-cicd","cleanlab_api")  # See the RUNME notebook to setup your Cleanlab Studio API key in a secret scope
 studio = cleanlab_studio.Studio(CLEANLAB_STUDIO_API_KEY)
 
 # COMMAND ----------
@@ -358,13 +358,12 @@ display(politeness_train_fixed)
 
 # COMMAND ----------
 
-# by default, use your dataset that you improved, downloaded as politeness_train_fixed above
-#
-# but for reproducibility, if you want to use the dataset that we exported from Cleanlab Studio,
-# set the flag below to 'True'
+# By default for reproducibility, we use the dataset that we exported from Cleanlab Studio as csv
+# But if you want to use your dataset that you improved, downloaded as politeness_train_fixed above
+# set the flag below to 'False'
 use_provided_training_set_improved_using_cleanlab_studio = True
 if use_provided_training_set_improved_using_cleanlab_studio:
-    politeness_train_fixed = pd.read_csv('https://s.cleanlab.ai/stanford-politeness/fine-tuning/train_fixed.csv')
+    politeness_train_fixed = pd.read_csv('https://raw.githubusercontent.com/databricks-industry-solutions/cleanlab-improving-llms/main/data/train_fixed.csv')
     politeness_train_fixed = with_id_column(spark.createDataFrame(politeness_train_fixed))
 
 # COMMAND ----------
@@ -411,11 +410,11 @@ print(f"Fine-tuning Accuracy: {fixed_acc:.1%}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Impact of improved data: 78% accuracy (compared to 65% baseline accuracy)
+# MAGIC ### Impact of improved data: ~78% accuracy (compared to ~65% baseline accuracy)
 # MAGIC
-# MAGIC Training on the improved dataset, we see a **test accuracy of 78%** for the Davinci model (Curie achieved 76% accuracy, Ada achieved 75% accuracy). These results are from our `train_fixed.csv` (provided above); results on your dataset will vary depending on how you improved the dataset using Cleanlab Studio (e.g., whether you used auto-fix or manually reviewed the top issues, how you corrected labels, how you removed outliers, etc.). Even the results of fine-tuning on the provided dataset might vary slightly, because model training is nondeterministic, and OpenAI's initial model checkpoints may be updated over time.
+# MAGIC Training on the improved dataset, we see a **test accuracy of 78%** for the Davinci model (Curie achieved ~76% accuracy, Ada achieved ~75% accuracy). These results are from our `train_fixed.csv` (provided above); results on your dataset will vary depending on how you improved the dataset using Cleanlab Studio (e.g., whether you used auto-fix or manually reviewed the top issues, how you corrected labels, how you removed outliers, etc.). Even the results of fine-tuning on the provided dataset might vary slightly, because model training is nondeterministic, and OpenAI's initial model checkpoints may be updated over time.
 # MAGIC
-# MAGIC In this evaluation, we see that data quality has a huge impact on LLM performance. **By simply improving the data quality** (and leaving the original LLM checkpoint, training parameters, fine-tuning process, etc. as-is), we have **reduced prediction error by 37%**.
+# MAGIC In this evaluation, we see that data quality has a huge impact on LLM performance. **By simply improving the data quality** (and leaving the original LLM checkpoint, training parameters, fine-tuning process, etc. as-is), we have **reduced prediction error by ~37%**.
 
 # COMMAND ----------
 
