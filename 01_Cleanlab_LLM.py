@@ -14,6 +14,8 @@
 # MAGIC
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
 # MAGIC
+# MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models).
+# MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
 # MAGIC ---
