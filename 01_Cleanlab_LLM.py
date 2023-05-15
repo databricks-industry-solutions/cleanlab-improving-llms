@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Better Large Language Models (LLMs) With Better Data
 # MAGIC
-# MAGIC This notebook demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/improving-llms-cleanlab.
+# MAGIC This notebook (and accompanying [video tutorial](https://www.youtube.com/watch?v=HnC6DwdV4EE)) demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/improving-llms-cleanlab.
 # MAGIC
 # MAGIC ---
 # MAGIC
@@ -12,8 +12,6 @@
 # MAGIC
 # MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
 # MAGIC
-# MAGIC <!-- <img src="./images/comparison.png" width="958"> -->
-# MAGIC <!-- temp URL below -->
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="958">
 # MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
