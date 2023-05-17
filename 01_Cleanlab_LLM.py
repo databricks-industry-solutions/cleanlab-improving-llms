@@ -1,26 +1,32 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Better Large Language Models (LLMs) With Better Data
+# MAGIC # Better Large Language Models (LLMs) With Better Data using Cleanlab Studio
 # MAGIC
-# MAGIC This notebook (and accompanying [video tutorial](https://www.youtube.com/watch?v=HnC6DwdV4EE)) demonstrates how using [data-centric AI](https://dcai.csail.mit.edu/) tools like [Cleanlab Studio](https://app.cleanlab.ai/) can improve the performance of your LLMs by improving data quality. You can find this notebook at https://github.com/databricks-industry-solutions/cleanlab-improving-llms.
+# MAGIC This notebook (and accompanying [video tutorial](https://www.youtube.com/watch?v=HnC6DwdV4EE)) demonstrates how [Cleanlab Studio](https://cleanlab.ai/) can improve the performance of your LLMs by improving the data they are fine-tuned on, an approach called [Data-centric AI (DCAI)](https://dcai.csail.mit.edu/). You can find this notebook at https://github.com/databricks-industry-solutions/cleanlab-improving-llms.
+# MAGIC
+# MAGIC In this notebook, we’ll see how Cleanlab Studio systematically improves the training data to boost LLM test accuracy by 37% without spending any time or resources to change the model architecture, hyperparameters, or the training process.
 # MAGIC
 # MAGIC ---
 # MAGIC
-# MAGIC This notebook focuses on _fine-tuning LLMs_. LLMs acquire powerful generative and discriminative capabilities after being pre-trained on a large corpus of text (usually scraped from the internet), but producing reliable outputs for a particular business use case often requires additional training on a labeled data set from the application domain. This domain-specific training is known as _fine-tuning_ the LLM.
+# MAGIC This notebook focuses on _boosting LLM fine-tuning accuracy using Cleanlab Studio_. LLMs acquire powerful generative and discriminative capabilities after being pre-trained on a large corpus of text (usually scraped from the internet), but producing reliable outputs for a particular business use case often requires additional training on a labeled data set from the application domain. This domain-specific training is known as _fine-tuning_ the LLM.
 # MAGIC
-# MAGIC Labeled data powers AI/ML in the enterprise, but real-world datasets have been found to [contain between 7-50% annotation errors](https://go.cloudfactory.com/hubfs/02-Contents/3-Reports/Crowd-vs-Managed-Team-Hivemind-Study.pdf). Imperfectly-labeled text data hampers the training (and evaluation of) ML models across tasks like intent recognition, entity recognition, and sequence generation. Although pretrained LLMs are equipped with a lot of world knowledge, their performance is adversely affected by noisy training data (as [noted by OpenAI](https://openai.com/research/dall-e-2-pre-training-mitigations)).  This notebook illustrates data-centric techniques to mitigate the effect of low-quality data without changing any code related to model architecture, hyperparameters, or training. These data quality improvement techniques should thus remain applicable even for future advanced LLMs like GPT-10.
+# MAGIC Labeled data powers AI/ML in the enterprise, but real-world datasets have been found to [contain between 7-50% annotation errors](https://go.cloudfactory.com/hubfs/02-Contents/3-Reports/Crowd-vs-Managed-Team-Hivemind-Study.pdf). Imperfectly-labeled text data hampers the training (and evaluation of) ML models across tasks like intent recognition, entity recognition, and sequence generation. Although pretrained LLMs are equipped with a lot of world knowledge, their performance is adversely affected by noisy training data (as [noted by OpenAI](https://openai.com/research/dall-e-2-pre-training-mitigations)).  This notebook illustrates how using Cleanlab Studio to improve the training data can mitigate the negative effects of bad data (such as erroneous labels) without writing any code or spending any time or resources to change the model architecture, hyperparameters, or training process.
 # MAGIC
-# MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://app.cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
+# MAGIC Because Cleanlab Studio works with data (regardless of which model is used) it remains applicable for LLMs that are yet to be invented, like GPT-10.
+# MAGIC
+# MAGIC This notebook applies LLMs to a politeness classification task, beginning by fine-tuning OpenAI's Davinci model on the baseline dataset. The model achieves moderate performance on this baseline, but by automatically finding and fixing errors in the data using the Databricks connector for [Cleanlab Studio](https://cleanlab.ai/), we can achieve significantly better performance _using the same LLM model and fine-tuning process_, just by improving the data (and spending minimal human time manually reviewing data that is most likely to be erroneous). We see a 37% reduction in prediction error when using Cleanlab Studio to improve the dataset:
 # MAGIC
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="957">
 # MAGIC
 # MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models). 
 # MAGIC
-# MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how data-centric AI techniques and tools can help you easily improve ML model robustness and performance by systematically improving data quality.
+# MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how [Cleanlab Studio](https://cleanlab.ai/) can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
 # MAGIC ---
 # MAGIC
-# MAGIC This notebook uses Cleanlab Studio to enhance data quality. If you don't have a Cleanlab Studio account already, [sign up for an account here](https://app.cleanlab.ai/). It may take up to one day to get access.
+# MAGIC This notebook uses Cleanlab Studio to boost LLM accuracy by correcting issues in the data the LLMs are fine-tuned on. Beyond boosting LLM performance, [Cleanlab Studio](https://cleanlab.ai) is an end-to-end platform for both (1) turning unreliable data into reliable insights for business intelligence and analytics teams and (2) training reliable AI solutions on unreliable data for MLOps and technology teams.
+# MAGIC
+# MAGIC If you don't have a Cleanlab Studio account already, [sign up for an account here](https://cleanlab.ai/). The platform is free to try. It may take up to one day to get access.
 
 # COMMAND ----------
 
@@ -310,7 +316,7 @@ dataset_id = studio.upload_dataset(politeness_train, dataset_name='Stanford Poli
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Make corrections
+# MAGIC ### Make corrections to your dataset with Cleanlab Studio
 # MAGIC
 # MAGIC Cleanlab Studio not only finds data points with potential issues, but it also makes suggestions for how to address the issues (e.g., changing the label of a data point). Deciding how to make use of the analysis results is up to you. For example, you could discard all potentially erroneous data points, or you could review the data points most likely to have issues and make corrections. This human-in-the-loop data correction usually gives the best results.
 # MAGIC
@@ -410,7 +416,7 @@ print(f"Fine-tuning Accuracy: {fixed_acc:.1%}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Impact of improved data: ~78% accuracy (compared to ~65% baseline accuracy)
+# MAGIC ### Impact of improved data with Cleanlab Studio: ~78% accuracy (compared to ~65% baseline accuracy)
 # MAGIC
 # MAGIC Training on the improved dataset, we see a **test accuracy of 78%** for the Davinci model (Curie achieved ~76% accuracy, Ada achieved ~75% accuracy). These results are from our `train_fixed.csv` (provided above); results on your dataset will vary depending on how you improved the dataset using Cleanlab Studio (e.g., whether you used auto-fix or manually reviewed the top issues, how you corrected labels, how you removed outliers, etc.). Even the results of fine-tuning on the provided dataset might vary slightly, because model training is nondeterministic, and OpenAI's initial model checkpoints may be updated over time.
 # MAGIC
@@ -419,8 +425,8 @@ print(f"Fine-tuning Accuracy: {fixed_acc:.1%}")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # Takeaways: what should I do differently going forward?
+# MAGIC # Takeaway: Use Cleanlab Studio to turn unreliable data into more reliable insights and models
 # MAGIC
-# MAGIC [Data-centric AI](https://dcai.csail.mit.edu/) is a powerful paradigm for dealing with erroneous or noisy data via AI/automated techniques rather than the tedious manual effort data scientists often dread. Tools like [Cleanlab Studio](https://app.cleanlab.ai/) help you efficiently find and fix data and label issues that can be used to improve any ML model (not just LLMs) for most types of data (not just text, but also images, audio, tabular data, etc). Cleanlab Studio improves your data without requiring that you write code or have any ML expertise.
+# MAGIC Errors like outliers and label issues are [common in real-world datasets](https://labelerrors.com), and these errors can have a dramatic impact on the reliability and robustness of ML models trained on this data as well as insights and analytics obtained. [Cleanlab Studio](https://cleanlab.ai/) is a solution for dealing with erroneous or noisy data via AI automated techniques to help avoid the tedious manual effort that data scientists often dread. Cleanlab Studio helps you efficiently find and fix data and label issues for any ML model (not just LLMs) and most types of data (not just text, but also images, audio, tabular data, etc.) without requiring you to write code or have any ML expertise. In the case study in this post, we saw how Cleanlab Studio boosted the test accuracy of an LLM fine-tuned for a classification task by 37% without spending any time or resources to change the model architecture, hyperparameters, or the training process.
 # MAGIC
-# MAGIC These sorts of tools will still remain applicable with future advances in ML models like GPT-10, and will only become better at identifying issues when used with more accurate models! Practice data-centric AI to systematically engineer better data via AI/automation. This frees you to capitalize on your unique domain knowledge rather than fixing general data issues like label errors.
+# MAGIC Because Cleanlab Studio improves models and insights by improving the underlying data, it works for any model or LLM that exists today or may exist in the future and will only become better at identifying issues as more accurate models are released!
