@@ -18,7 +18,7 @@
 # MAGIC
 # MAGIC <img src="https://github.com/databricks-industry-solutions/improving-llms-cleanlab/raw/main/images/comparison.png" width="957">
 # MAGIC
-# MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models). 
+# MAGIC You would see analogous results whether you are using popular APIs for fine-tuning LLMs or training open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) or [MPT-7B](https://www.mosaicml.com/blog/mpt-7b) directly [on Databricks](https://www.databricks.com/product/machine-learning/large-language-models).
 # MAGIC
 # MAGIC See the accompanying blog post for additional context on LLMs and fine-tuning, why data quality matters for LLMs and ML tasks in general, and how [Cleanlab Studio](https://cleanlab.ai/) can help you easily improve ML model robustness and performance by systematically improving data quality.
 # MAGIC
@@ -34,6 +34,8 @@
 # MAGIC ## Install and configure dependencies
 # MAGIC
 # MAGIC This notebook uses the fine-tuning APIs [offered by OpenAI](https://platform.openai.com/docs/guides/fine-tuning).
+# MAGIC
+# MAGIC You can also fine tune open-source LLMs like [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) or [MPT-7B](https://www.mosaicml.com/blog/mpt-7b) directly [on the Databricks platform](https://www.databricks.com/product/machine-learning/large-language-models).
 
 # COMMAND ----------
 
